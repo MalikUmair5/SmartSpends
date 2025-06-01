@@ -57,4 +57,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#0a7ea4',
   },
+  description: {
+    fontSize: 12,
+    textAlign: "center",
+    textAlignVertical: "center",
+    marginHorizontal: 20,
+    fontWeight: "300",
+    alignSelf: "center"
+  }
 });
