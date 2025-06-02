@@ -1,31 +1,39 @@
-import { StyleSheet, TextInput, TextInputProps } from "react-native";
-import { View, Text } from "react-native";
-import { ThemedText } from "./ThemedText";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import { ThemedText } from "./ThemedText";
 
 interface InputProps extends TextInputProps {
     label: string;
 }
 
-
-export default function ThemedInput({ label, ...props }: InputProps) {
-
-    const color = useThemeColor({}, 'text')
-
+export default function ThemedInput({ label, placeholderTextColor, style, ...props }: InputProps) {
+    const textColor = useThemeColor({}, 'text');
+    const placeholderColor = useThemeColor({}, 'icon');
 
     return (
         <View style={{ width: '100%' }}>
-            <ThemedText  type="default">{label}</ThemedText>
-            <TextInput style={[style.Input, {borderBottomColor: color, color}]} {...props} />
+            <ThemedText type="default">{label}</ThemedText>
+            <TextInput 
+                style={[
+                    styles.input, 
+                    { 
+                        borderBottomColor: textColor,
+                        color: textColor,
+                        backgroundColor: 'transparent'
+                    },
+                    style
+                ]} 
+                placeholderTextColor={placeholderColor}
+                {...props} 
+            />
         </View>
-    )
+    );
 }
 
-
-const style = StyleSheet.create({
-    Input: {
+const styles = StyleSheet.create({
+    input: {
         borderStyle: "solid",
-        width: "100%", color: 'black',
+        width: "100%",
         borderBottomWidth: 5,
         borderTopWidth: 1,
         borderRightWidth: 5,
@@ -34,8 +42,10 @@ const style = StyleSheet.create({
         borderBottomRightRadius: 5,
         borderBottomLeftRadius: 5,
         marginTop: 0,
-        marginBottom: 10
+        marginBottom: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 4
     }
-})
+});
 
 
