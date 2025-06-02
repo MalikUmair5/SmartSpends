@@ -1,75 +1,179 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { HistoryItem } from "@/components/HistoryItem";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { RootState } from "@/store";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useSelector } from "react-redux";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+interface ThemedTextProps {
+  style?: any;
+  type?: string;
+  children?: React.ReactNode;
+}
+
+// Card component for balance and stats
+const Card = ({ children, style }: { children: React.ReactNode; style?: any }) => {
+  const backgroundColor = useThemeColor({}, 'background');
+  const borderColor = useThemeColor({}, 'icon');
+  const cardBgColor = useThemeColor({}, 'background') === '#fff' ? '#151718' : '#fff';
+  const textColor = cardBgColor === '#fff' ? '#151718' : '#fff';
+
+  return (
+    <View style={[styles.card, { backgroundColor: cardBgColor, borderColor }, style]}>
+      {React.Children.map(children, child => {
+        if (React.isValidElement<ThemedTextProps>(child)) {
+          return React.cloneElement(child, {
+            style: { ...child.props.style, color: textColor }
+          });
+        }
+        return child;
+      })}
+    </View>
+  );
+};
 
 export default function HomeScreen() {
+  const { name, initialBalance } = useSelector((state: RootState) => state.userPreferences);
+  const { transactions, totalBalance, totalIncome, totalExpense } = useSelector(
+    (state: RootState) => state.transactions
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
+    <ThemedView style={styles.container}>
+      {/* Fixed Top Section */}
+      <View style={styles.topSection}>
+        {/* Greeting */}
+        <ThemedText type="title" style={styles.greeting}>
+          Hi, {name}
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+
+        {/* Balance Card */}
+        <Card style={styles.balanceCard}>
+          <ThemedText type="subtitle">Total Balance</ThemedText>
+          <ThemedText type="title" style={styles.balanceAmount}>
+            ${totalBalance + initialBalance}
+          </ThemedText>
+        </Card>
+
+        {/* Income/Expense Cards */}
+        <View style={styles.statsContainer}>
+          <Card style={styles.statCard}>
+            <ThemedText type="subtitle">Income</ThemedText>
+            <ThemedText type="default" style={styles.incomeAmount}>
+              +${totalIncome}
+            </ThemedText>
+          </Card>
+          <Card style={styles.statCard}>
+            <ThemedText type="subtitle">Expenses</ThemedText>
+            <ThemedText type="default" style={styles.expenseAmount}>
+              -${totalExpense}
+            </ThemedText>
+          </Card>
+        </View>
+      </View>
+
+      {/* Scrollable Transactions Section */}
+      <View style={styles.transactionsSection}>
+        <ThemedText type="title" style={styles.sectionTitle}>
+          Recent Transactions
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        
+        <ScrollView style={styles.transactionsScroll}>
+          {transactions.map((transaction, index) => (
+            <HistoryItem
+              key={index}
+              type={transaction.type}
+              amount={transaction.amount}
+              date={transaction.date}
+              category={transaction.category}
+            />
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Add Transaction Button */}
+      <TouchableOpacity 
+        style={styles.addButton}
+        onPress={() => router.push('/add-transaction' as any)}
+      >
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+  topSection: {
+    padding: 20,
+    paddingBottom: 0,
+  },
+  greeting: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  card: {
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+  },
+  balanceCard: {
+    marginBottom: 20,
+  },
+  balanceAmount: {
+    fontSize: 32,
+    marginTop: 10,
+  },
+  statsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    gap: 15,
+    marginBottom: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  statCard: {
+    flex: 1,
+    padding: 15,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  incomeAmount: {
+    fontSize: 20,
+    marginTop: 5,
+  },
+  expenseAmount: {
+    fontSize: 20,
+    marginTop: 5,
+  },
+  transactionsSection: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    marginBottom: 15,
+  },
+  transactionsScroll: {
+    flex: 1,
+  },
+  addButton: {
     position: 'absolute',
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0a7ea4',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
