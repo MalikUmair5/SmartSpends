@@ -27,6 +27,12 @@ export default function WelcomeLayout() {
                     headerShown: false,
                 }}
             />
+                <Stack.Screen
+                name="InitialSetup"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }

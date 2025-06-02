@@ -20,7 +20,6 @@ export function ThemedButton({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-  console.log(color)
 
   return (
     <TouchableOpacity
@@ -30,7 +29,7 @@ export function ThemedButton({
         ]}
       {...rest}
     >
-     <Text style={{color: textColor}}>{children}</Text>
+     <Text style={color === "#11181C" ? {color: "white"} : {color: "11181C"}}>{children}</Text>
     </TouchableOpacity>
   );
 }

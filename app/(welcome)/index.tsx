@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
                 <ThemedText  type="description" style={{ textAlign: 'center', marginBottom: 20 }}>Stay on top of your finances by keeping a track of you income and expanses</ThemedText>
             </View>
             <View style={{ width: '100%' }}>
-                <ThemedButton textColor="white" type="full-width" onPress={handleGetStarted}>Get Started</ThemedButton>
+                <ThemedButton type="full-width" onPress={handleGetStarted}>Get Started</ThemedButton>
             </View>
         </ThemedView>
     )

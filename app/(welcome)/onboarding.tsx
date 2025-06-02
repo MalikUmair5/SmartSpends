@@ -57,7 +57,6 @@ export default function OnboardingScreen() {
             <ThemedButton 
                 style={styles.skipButton}
                 onPress={handleSkip}
-                textColor="white"
             >
                 Skip
             </ThemedButton>
@@ -103,7 +102,6 @@ export default function OnboardingScreen() {
             <ThemedButton
                 style={styles.nextButton}
                 onPress={handleNext}
-                textColor="white"
             >
                 {currentIndex === slides.length - 1 ? "Get Started" : "Next"}
             </ThemedButton>
@@ -114,7 +112,6 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
     },
     skipButton: {
         position: 'absolute',
@@ -142,7 +139,6 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 16,
         textAlign: 'center',
-        color: '#666',
         paddingHorizontal: 20,
     },
     pagination: {
