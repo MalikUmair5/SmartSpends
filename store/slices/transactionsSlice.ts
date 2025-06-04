@@ -1,4 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+const STORAGE_KEY = '@transactions';
 
 interface Transaction {
   id: string;
@@ -23,6 +26,17 @@ const initialState: TransactionsState = {
   totalExpense: 0,
 };
 
+// Load initial state from AsyncStorage
+export const loadTransactions = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+    return jsonValue != null ? JSON.parse(jsonValue) : initialState;
+  } catch (error) {
+    console.error('Error loading transactions:', error);
+    return initialState;
+  }
+};
+
 const transactionsSlice = createSlice({
   name: 'transactions',
   initialState,
@@ -40,14 +54,30 @@ const transactionsSlice = createSlice({
         .filter(t => t.type === 'expense')
         .reduce((acc, curr) => acc + curr.amount, 0);
     },
-    resetTransactions: (state) => {
-      state.transactions = [];
-      state.totalBalance = 0;
-      state.totalIncome = 0;
-      state.totalExpense = 0;
+    setTransactions: (state, action: PayloadAction<TransactionsState>) => {
+      return action.payload;
     },
+    resetTransactions: () => initialState,
   },
 });
 
-export const { addTransaction, resetTransactions } = transactionsSlice.actions;
+// Middleware to handle AsyncStorage operations
+export const transactionsMiddleware = (store: any) => (next: any) => async (action: any) => {
+  const result = next(action);
+  
+  if (action.type === 'transactions/addTransaction' || 
+      action.type === 'transactions/resetTransactions' ||
+      action.type === 'transactions/setTransactions') {
+    try {
+      const state = store.getState().transactions;
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.error('Error saving transactions:', error);
+    }
+  }
+  
+  return result;
+};
+
+export const { addTransaction, resetTransactions, setTransactions } = transactionsSlice.actions;
 export default transactionsSlice.reducer;

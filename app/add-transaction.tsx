@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
+
 const transactionTypes = [
   { label: 'Income', value: 'income' },
   { label: 'Expense', value: 'expense' },
@@ -92,7 +93,7 @@ export default function AddTransactionScreen() {
     return true;
   };
 
-  const handleAddTransaction = () => {
+  const handleAddTransaction = async () => {
     const isAmountValid = validateAmount();
     const isCategoryValid = validateCategory();
 
@@ -106,6 +107,9 @@ export default function AddTransactionScreen() {
       date: date.toISOString(),
       note: notes.trim() || undefined,
     }));
+
+
+
 
     router.back();
   };

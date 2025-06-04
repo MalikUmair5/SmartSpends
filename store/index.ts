@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
-import transactionsReducer from './slices/transactionsSlice';
-import userPreferencesReducer from './slices/userPrefrencesSlice';
+import transactionsReducer, { transactionsMiddleware } from './slices/transactionsSlice';
+import userPreferencesReducer, { userPreferencesMiddleware } from './slices/userPrefrencesSlice';
 
 export const store = configureStore({
   reducer: {
     userPreferences: userPreferencesReducer,
     transactions: transactionsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(userPreferencesMiddleware, transactionsMiddleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -15,6 +15,7 @@ export function useThemeManager() {
     userTheme: validUserTheme,
     finalTheme: validUserTheme === 'system' ? validSystemTheme : validUserTheme
   });
+  
 
   // If user selected 'system', use system theme, otherwise use selected theme
   return validUserTheme === 'system' ? validSystemTheme : validUserTheme;

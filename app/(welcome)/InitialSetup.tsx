@@ -5,7 +5,6 @@ import { ThemedText } from "@/components/ThemedText"
 import { ThemedView } from "@/components/ThemedView"
 import { useColorScheme } from "@/hooks/useColorScheme"
 import { setUserPreferences } from '@/store/slices/userPrefrencesSlice'
-import { saveData, STORAGE_KEYS } from "@/utils/storage"
 import { router } from "expo-router"
 import { useEffect, useState } from "react"
 import { StyleSheet, View } from "react-native"
@@ -40,14 +39,7 @@ export default function InitialSetupScreen() {
         if (selectedTheme.length > 0) {
             const newTheme = selectedTheme[0] as 'light' | 'dark' | 'system';
             console.log('Theme selected:', newTheme);
-            
-            // Update Redux store immediately
             dispatch(setUserPreferences({ theme: newTheme }));
-            
-            // Save to AsyncStorage
-            saveData(STORAGE_KEYS.USER_PREFERENCES, { theme: newTheme })
-                .then(() => console.log('Theme saved to storage'))
-                .catch(error => console.error('Error saving theme:', error));
         }
     }, [selectedTheme]);
 
@@ -58,28 +50,17 @@ export default function InitialSetupScreen() {
         if (!name.trim()) {
             setNameError("Name is required");
             isValid = false;
-        } else if (name.trim().length < 2) {
-            setNameError("Name must be at least 2 characters");
-            isValid = false;
         } else {
             setNameError("");
         }
 
         // Validate balance
-        if (!initialBalance.trim()) {
-            setBalanceError("Initial balance is required");
+        const balance = parseFloat(initialBalance);
+        if (isNaN(balance) || balance < 0) {
+            setBalanceError("Please enter a valid positive number");
             isValid = false;
         } else {
-            const numBalance = parseFloat(initialBalance);
-            if (isNaN(numBalance)) {
-                setBalanceError("Please enter a valid number");
-                isValid = false;
-            } else if (numBalance < 0) {
-                setBalanceError("Balance cannot be negative");
-                isValid = false;
-            } else {
-                setBalanceError("");
-            }
+            setBalanceError("");
         }
 
         // Validate currency
@@ -93,7 +74,7 @@ export default function InitialSetupScreen() {
         return isValid;
     };
 
-    const handleFinish = async () => {
+    const handleFinish = () => {
         if (!validateForm()) {
             return;
         }
@@ -108,11 +89,8 @@ export default function InitialSetupScreen() {
 
         console.log('Saving preferences:', userPreferences);
 
-        // Save to Redux store
+        // Save to Redux store (AsyncStorage is handled by middleware)
         dispatch(setUserPreferences(userPreferences));
-
-        // Save to AsyncStorage
-        await saveData(STORAGE_KEYS.USER_PREFERENCES, userPreferences);
 
         // Navigate to main app
         router.replace("/(tabs)");

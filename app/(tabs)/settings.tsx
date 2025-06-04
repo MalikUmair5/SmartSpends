@@ -4,8 +4,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { RootState } from '@/store';
 import { resetTransactions } from '@/store/slices/transactionsSlice';
-import { setUserPreferences } from '@/store/slices/userPrefrencesSlice';
-import { saveData, STORAGE_KEYS } from '@/utils/storage';
+import { resetUserPreferences, setUserPreferences } from '@/store/slices/userPrefrencesSlice';
+import { getCurrencySymbol } from "@/utils/currency";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -20,57 +20,46 @@ const themeOptions = [
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
-  const { name, initialBalance, theme } = useSelector((state: RootState) => state.userPreferences);
+  const { name, initialBalance, theme, currency } = useSelector((state: RootState) => state.userPreferences);
   const backgroundColor = useThemeColor({}, 'background');
   const borderColor = useThemeColor({}, 'icon');
   const tintColor = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'text');
   const innerBorderColor = useThemeColor({}, 'background') === '#fff' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+  const currencySymbol = getCurrencySymbol(currency);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [newName, setNewName] = useState(name);
   const [newBalance, setNewBalance] = useState(initialBalance.toString());
 
-  const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     dispatch(setUserPreferences({ theme: newTheme }));
-    await saveData(STORAGE_KEYS.USER_PREFERENCES, { theme: newTheme });
   };
 
-  const handleNameSave = async () => {
+  const handleNameSave = () => {
     if (!newName.trim()) {
       Alert.alert('Error', 'Name cannot be empty');
       return;
     }
     dispatch(setUserPreferences({ name: newName.trim() }));
-    await saveData(STORAGE_KEYS.USER_PREFERENCES, { name: newName.trim() });
     setIsEditingName(false);
   };
 
-  const handleBalanceSave = async () => {
+  const handleBalanceSave = () => {
     const balance = parseFloat(newBalance);
     if (isNaN(balance)) {
       Alert.alert('Error', 'Please enter a valid number');
       return;
     }
     dispatch(setUserPreferences({ initialBalance: balance }));
-    await saveData(STORAGE_KEYS.USER_PREFERENCES, { initialBalance: balance });
     setIsEditingBalance(false);
   };
 
-  const handleReset = async () => {
+  const handleReset = () => {
     try {
-      // Clear stored data
-      await saveData(STORAGE_KEYS.USER_PREFERENCES, null);
-      await saveData(STORAGE_KEYS.TRANSACTIONS, null);
-      
       // Reset Redux state
-      dispatch(setUserPreferences({
-        name: '',
-        initialBalance: 0,
-        theme: 'system',
-        currency: 'USD'
-      }));
+      dispatch(resetUserPreferences());
       dispatch(resetTransactions());
       
       // Show confirmation
@@ -170,7 +159,7 @@ export default function SettingsScreen() {
       >
         <View style={styles.settingInfo}>
           <ThemedText type="subtitle">Initial Balance</ThemedText>
-          <ThemedText>${initialBalance}</ThemedText>
+          <ThemedText>{currencySymbol}{initialBalance}</ThemedText>
         </View>
         <Ionicons name="chevron-forward" size={24} color={textColor} />
       </TouchableOpacity>

@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { RootState } from '@/store';
+import { getCurrencySymbol } from "@/utils/currency";
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 
@@ -9,10 +10,12 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function AnalyticsScreen() {
   const { transactions, totalIncome, totalExpense } = useSelector((state: RootState) => state.transactions);
+  const { currency } = useSelector((state: RootState) => state.userPreferences);
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
   const cardColor = useThemeColor({}, 'card');
+  const currencySymbol = getCurrencySymbol(currency);
 
   // Calculate percentages for income vs expense
   const total = totalIncome + totalExpense;

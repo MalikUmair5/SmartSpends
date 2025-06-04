@@ -1,6 +1,9 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { RootState } from "@/store";
+import { getCurrencySymbol } from "@/utils/currency";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
+import { useSelector } from "react-redux";
 import { ThemedText } from "./ThemedText";
 
 interface HistoryItemProps {
@@ -11,10 +14,12 @@ interface HistoryItemProps {
 }
 
 export function HistoryItem({ type, amount, date, category }: HistoryItemProps) {
+  const { currency } = useSelector((state: RootState) => state.userPreferences);
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
   const iconColor = type === 'income' ? '#4CAF50' : '#F44336';
+  const currencySymbol = getCurrencySymbol(currency);
 
   // Format date to show "Today", "Yesterday", or the actual date
   const formatDate = (dateStr: string) => {
@@ -53,7 +58,7 @@ export function HistoryItem({ type, amount, date, category }: HistoryItemProps) 
         type="default" 
         style={[styles.amount, { color: iconColor }]}
       >
-        {type === 'income' ? '+' : '-'}${Math.abs(amount)}
+        {type === 'income' ? '+' : '-'}{currencySymbol}{Math.abs(amount)}
       </ThemedText>
     </View>
   );

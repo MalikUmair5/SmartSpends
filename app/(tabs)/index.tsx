@@ -3,6 +3,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { RootState } from "@/store";
+import { getCurrencySymbol } from "@/utils/currency";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from 'react';
@@ -37,10 +38,12 @@ const Card = ({ children, style }: { children: React.ReactNode; style?: any }) =
 };
 
 export default function HomeScreen() {
-  const { name, initialBalance } = useSelector((state: RootState) => state.userPreferences);
+  const { name, initialBalance, currency } = useSelector((state: RootState) => state.userPreferences);
   const { transactions, totalBalance, totalIncome, totalExpense } = useSelector(
     (state: RootState) => state.transactions
   );
+
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <ThemedView style={styles.container}>
@@ -55,7 +58,7 @@ export default function HomeScreen() {
         <Card style={styles.balanceCard}>
           <ThemedText type="subtitle">Total Balance</ThemedText>
           <ThemedText type="title" style={styles.balanceAmount}>
-            ${totalBalance + initialBalance}
+            {currencySymbol}{totalBalance + initialBalance}
           </ThemedText>
         </Card>
 
@@ -64,13 +67,13 @@ export default function HomeScreen() {
           <Card style={styles.statCard}>
             <ThemedText type="subtitle">Income</ThemedText>
             <ThemedText type="default" style={styles.incomeAmount}>
-              +${totalIncome}
+              +{currencySymbol}{totalIncome}
             </ThemedText>
           </Card>
           <Card style={styles.statCard}>
             <ThemedText type="subtitle">Expenses</ThemedText>
             <ThemedText type="default" style={styles.expenseAmount}>
-              -${totalExpense}
+              -{currencySymbol}{totalExpense}
             </ThemedText>
           </Card>
         </View>

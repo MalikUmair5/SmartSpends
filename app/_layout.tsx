@@ -8,8 +8,17 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { Provider, useDispatch } from 'react-redux';
 import { store } from '../store';
-import { setUserPreferences } from '../store/slices/userPrefrencesSlice';
-import { loadData, STORAGE_KEYS } from '../utils/storage';
+import { loadTransactions, setTransactions } from '../store/slices/transactionsSlice';
+import { loadUserPreferences, setUserPreferences } from '../store/slices/userPrefrencesSlice';
+
+interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  note?: string;
+  date: string;
+}
 
 function RootLayoutNav() {
   const router = useRouter();
@@ -19,16 +28,29 @@ function RootLayoutNav() {
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
-        // Load saved preferences
-        const savedPreferences = await loadData(STORAGE_KEYS.USER_PREFERENCES);
+        // Load saved preferences and transactions
+        const [savedPreferences, savedTransactions] = await Promise.all([
+          loadUserPreferences(),
+          loadTransactions()
+        ]);
         
-        if (savedPreferences) {
-          // If preferences exist, user has been onboarded
+        // Check if user has completed onboarding by looking for a name
+        const hasCompletedOnboarding = savedPreferences && savedPreferences.name.trim() !== '';
+        
+        if (hasCompletedOnboarding) {
+          // If preferences exist and user has completed onboarding
           dispatch(setUserPreferences(savedPreferences));
+          
+          // Load saved transactions if they exist
+          if (savedTransactions && savedTransactions.transactions.length > 0) {
+            // Set all transactions at once
+            dispatch(setTransactions(savedTransactions));
+          }
+          
           // Redirect to main app
           router.replace('/(tabs)');
         } else {
-          // If no preferences, user needs onboarding
+          // If no preferences or no name set, user needs onboarding
           router.replace('/(welcome)');
         }
       } catch (error) {
